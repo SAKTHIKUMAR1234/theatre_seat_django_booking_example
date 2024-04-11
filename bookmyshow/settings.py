@@ -29,7 +29,8 @@ INSTALLED_APPS = [
     # 'django.contrib.staticfiles',
     'auth_app',
     'theatre_app',
-    'book_app'
+    'book_app',
+    'logger'
     
 ]
 
@@ -41,6 +42,7 @@ MIDDLEWARE = [
     # 'django.contrib.auth.middleware.AuthenticationMiddleware',
     # 'django.contrib.messages.middleware.MessageMiddleware',
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'logger.middleware.LoggingMiddleware'
 ]
 
 ROOT_URLCONF = 'bookmyshow.urls'

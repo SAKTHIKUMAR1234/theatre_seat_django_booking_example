@@ -6,7 +6,7 @@ from datetime import datetime,timedelta,UTC
 import uuid
 from auth_app.models import Activity
 from django.conf import settings
-
+from logger.middleware import custome_logger
 
 def response_sender(message,data,http:HTTPStatus):
   
@@ -92,6 +92,9 @@ def token_required():
       activity = Activity.objects.filter(session_id = session_id).first()
       if activity is None:
         return response_sender(message='Make Login First',data=None,http=HTTPStatus.FORBIDDEN)
-      return func(activity.user,request,*args, **kwargs)
+      response =  func(activity.user,request,*args, **kwargs)
+      custome_logger(activity.user,response)
+      return response
+      
     return wrapper_func
   return wrapper

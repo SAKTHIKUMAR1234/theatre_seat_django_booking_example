@@ -38,15 +38,16 @@ def block_seat(user,request:HttpRequest,seat_id):
 @token_required()
 def release_seat(user,request:HttpRequest,seat_id):
   if request.method == 'PUT':
-    seat = SeatModel.objects.select_for_update().filter(id = seat_id).first()
-    if seat is None:
-      return response_sender(message='Invalid Seat Details',data=None,http=HTTPStatus.NOT_FOUND)
-    status = check_availability(seat)
-    if status != 'BLOCKED':
-      return response_sender(message='Invalid Action',data=None,http=HTTPStatus.BAD_REQUEST)
-    if status == 'BOOKED':
-      return response_sender(message='Seat is Booked',data=None,http=HTTPStatus.BAD_REQUEST)
     with transaction.atomic():
+      seat = SeatModel.objects.select_for_update().filter(id = seat_id).first()
+      if seat is None:
+        return response_sender(message='Invalid Seat Details',data=None,http=HTTPStatus.NOT_FOUND)
+      status = check_availability(seat)
+      if status != 'BLOCKED':
+        return response_sender(message='Invalid Action',data=None,http=HTTPStatus.BAD_REQUEST)
+      if status == 'BOOKED':
+        return response_sender(message='Seat is Booked',data=None,http=HTTPStatus.BAD_REQUEST)
+    
       seat.start_time = timezone.now()
       seat.end_time = timezone.now() 
       seat.blocked_by = None
@@ -60,17 +61,18 @@ def release_seat(user,request:HttpRequest,seat_id):
 @token_required()
 def book_seat(user,request:HttpRequest,seat_id):
   if request.method == 'PUT':
-    seat = SeatModel.objects.select_for_update().filter(id = seat_id).first()
-    if seat is None:
-      return response_sender(message='Invalid Seat Details',data=None,http=HTTPStatus.NOT_FOUND)
-    status = check_availability(seat)
-    if status != 'BLOCKED':
-      return response_sender(message='Invalid Action',data=None,http=HTTPStatus.BAD_REQUEST)
-    if status == 'AVAIL':
-      return response_sender(message='Seat is not blocked',data=None,http=HTTPStatus.BAD_REQUEST)
-    if seat.blocked_by != user:
-      return response_sender(message='This seat is already booked by another person',data=None,http=HTTPStatus.BAD_REQUEST)
     with transaction.atomic():
+      seat = SeatModel.objects.select_for_update().filter(id = seat_id).first()
+      if seat is None:
+        return response_sender(message='Invalid Seat Details',data=None,http=HTTPStatus.NOT_FOUND)
+      status = check_availability(seat)
+      if status != 'BLOCKED':
+        return response_sender(message='Invalid Action',data=None,http=HTTPStatus.BAD_REQUEST)
+      if status == 'AVAIL':
+        return response_sender(message='Seat is not blocked',data=None,http=HTTPStatus.BAD_REQUEST)
+      if seat.blocked_by != user:
+        return response_sender(message='This seat is already booked by another person',data=None,http=HTTPStatus.BAD_REQUEST)
+    
       ticket = TicketModel()
       ticket.user = user
       ticket.seat = seat
