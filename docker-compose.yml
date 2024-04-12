@@ -1,0 +1,15 @@
+version: '3.2'
+
+services:
+  web:
+    build: .
+    container_name: bms
+    network_mode : "host"
+    command: sh -c 'python manage.py makemigrations && python manage.py migrate && python manage.py runserver'
+    ports:
+      - "8001:8000"
+volumes:
+    db:
+      driver : local
+
+    
